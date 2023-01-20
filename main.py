@@ -17,9 +17,6 @@ from fn import draw_single
 from Track.Tracker import Detection, Tracker
 from ActionsEstLoader import TSSTG
 
-# source = "rtsp://neuron:neuron1234@192.168.100.46:554/cam/realmonitor?channel=1&subtype=1"
-source = "rtsp://neuron:neuron1234@192.168.100.46:554/cam/realmonitor?channel=1&subtype=1"
-
 def preproc(image):
     """preprocess function for CameraLoader.
     """
