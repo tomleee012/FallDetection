@@ -34,6 +34,9 @@ def kpt2bbox(kpt, ex=20):
 
 
 if __name__ == '__main__':
+    # default video source (for testing)
+    source = './FallDetectTest.mp4'
+
     par = argparse.ArgumentParser(description='Human Fall Detection Demo.')
     par.add_argument('--camera', default=source,  # required=True,  # default=2,
                         help='Source of camera or video file path.')
@@ -51,6 +54,9 @@ if __name__ == '__main__':
                         help='Non-Maximum Suppression overlap threshold.')
     par.add_argument('--conf_thres', type=float, default=0.99,
                         help='Minimum Confidence threshold of predicted bboxs to cut off.')
+    par.add_argument('--push', default=False, type=bool,
+                        help='Whether to push a video')
+
     args = par.parse_args()
 
     device = args.device
@@ -90,17 +96,15 @@ if __name__ == '__main__':
         codec = cv2.VideoWriter_fourcc(*'mp4v')
         writer = cv2.VideoWriter(args.save_out, codec, 30, (inp_dets * 2, inp_dets * 2))
 
-    # rtmpUrl="rtmp://192.168.100.240:1990/live/livestream31"
-    rtmpUrl="rtmp://192.168.100.240/live/livestream31"
-    pipe=rtmpPipe()
 
-    streamss = cv2.VideoCapture(cam_source)
-    streamss.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-    fpsss = streamss.get(cv2.CAP_PROP_FPS)
-    # fpsss = 25.0
-    frame_sizess = (int(streamss.get(cv2.CAP_PROP_FRAME_WIDTH)), int(streamss.get(cv2.CAP_PROP_FRAME_HEIGHT)))
-    pipe.createPipe(768, 768, fpsss, rtmpUrl)
-    # pipe.createPipe(frame_sizess[0], frame_sizess[1], fpsss, rtmpUrl)
+    if args.push:
+        rtmpUrl="rtmp://192.168.100.240/live/livestream31"
+        pipe=rtmpPipe()
+
+        streamss = cv2.VideoCapture(cam_source)
+        streamss.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        fpsss = streamss.get(cv2.CAP_PROP_FPS)
+        pipe.createPipe(768, 768, fpsss, rtmpUrl)
 
     fps_time = 0
     f = 0
@@ -173,8 +177,9 @@ if __name__ == '__main__':
             writer.write(frame)
 
         cv2.imshow('frame', frame)
-        pipe.send(frame)
-        # print(frame.shape)
+        
+        if args.push:
+            pipe.send(frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
